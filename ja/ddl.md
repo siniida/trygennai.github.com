@@ -45,8 +45,8 @@ PARTITIONED BY clause を省略した場合は、Tupleをランダムに振り�
         field8 BOOLEAN,
         field9 TIMESTAMP,
         field10 MAP<INT, STRING>
-        )
-        PARTITIONED BY field1
+    )
+    PARTITIONED BY field1
 
 ### Field Types
 
@@ -276,8 +276,8 @@ JSONTupleでは、フィールドの値をObjects構造で記述します。
         field8 BOOLEAN,
         field9 TIMESTAMP,
         field10 MAP<INT, STRING>
-        )
-        PARTITIONED BY _tno
+    )
+    PARTITIONED BY _tno
 
 ### Tracking ID と Tracking No
 

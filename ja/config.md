@@ -30,6 +30,11 @@ GungnirServerとTupleStoreServerが、同一のプロセスで稼働します。
 
 ![standalone](/img/mode_standalone.png)
 
+下記の制限があります。
+
+* メタ情報がメモリに格納されているため、再起動を行うとメタ情報が失われます。
+* `FROM`句では、[Memory Spout Processor](dml.html#MEMORY_SPOUT)のみ使用可能です。
+
 Kafka、MongoDB等を別途構築すると、Topologyにて、Kafka、MongoDB等へデータを書き出したり、データを取得したりすることも可能です。外部入出力には、Kafka、MongoDB、HTTP(Solr, Elasticsearch, ...)を用いることが可能です。
 
 起動には下記コマンドを実行します。
@@ -153,7 +158,7 @@ GungnirServerとTupleStoreServerが、それぞれ別プロセスとして稼働
 
 分散モード(疑似分散/完全分散)を指定している場合、 **gungnir.server.host**, **gungnir.server.port**, **tuple.store.server.host**, **tuple.store.server.port** の各設定値は使用されません。[クライアントツール](cli.html)(gungnir, post)が接続するGungnirServer/TupleStoreServerに関する情報は **cluster.zookeeper.servers** で指定したZooKeeperアンサンブルから取得します。
 
-> Default: "local"
+> Default: "distributed"
 
 #### cluster.zookeeper.servers <a name="c.cluster.zookeeper.servers" class="anchor"></a>
 

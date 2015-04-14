@@ -35,16 +35,16 @@ TupleをKafkaから読み込みます。
 
     kafka_spout()
 
-#### Memory Spout Processor
+#### Memory Spout Processor <a name="MEMORY_SPOUT" class="anchor"></a>
 
-Tupleをメモリから読み込みます。
+[ローカルモード](config.html#mode.local)における動作確認用として、Kafkaを経由せずに、メモリからTupleを読み込みます。
 
     memory_spout()
 
-Memory Spout Processorを使用するには、GungnirServerの下記設定項目が共に **local** となっている必要があります。
+Memory Spout Processorを使用するには、GungnirServerの下記設定項目が共に **local** となっている必要があります([ローカルモード](config.html#mode.local)での稼働)。
 
-* cluster.mode
-* storm.cluster.mode
+* [cluster.mode](config.html#s.cluster.mode)
+* [storm.cluster.mode](config.html#s.storm.cluster.mode)
 
 ### ストリームからの入力 <a name="FROM_STREAM" class="anchor"></a>
 
@@ -180,91 +180,72 @@ INTO を使って出力したストリームは、FROM で読み込むことが�
 
 JOINは、外部データをフィールドとしてTupleに結合します。
 
-    JOIN join_name ON join_condition TO join_fields USING fetch_processor
-
-    join_condition:
-    join_name.key_field = field [AND join_name.key_field = field AND join_name.key_field <> 0]
+    JOIN join_fields USING fetch_processor
 
     join_fields:
-    join_name.join_field [AS field_alias, ...]
+    join_field [, ...]
 
-
-* join_name には、結合する外部データソースの名称を指定します(join_condition や join_fields でのフィールド指定に利用します)
-* join_condition には、結合条件を指定します。
-結合データのキーフィールド = Tupleのフィールド を、結合データが一意になるように指定してください。
-複合条件の場合は、AND で指定します。結合データのキーフィールドに対して、定数で条件を指定することもできます。
 * join_fields には、結合するフィールドを全て指定します。
-結合データのフィールド名 AS Tupleに結合する際のフィールド名 を指定するか、フィールド名だけを指定します。
 フィールドはTupleに追加されます。
-* field_alias は、省略可能です。省略すると元データのフィールド名で結合されます。
 
-### MongoDBデータとの結合
+fetch_processorにて複数のドキュメントが返却された場合、Tupleは返却されたドキュメントと同数複製されます。
 
-    JOIN .. ON .. TO .. EXPIRE .. USING mongo_fetch(..)
+JOINは、`GROUP BY`されたストリームの中で使用することはできません。`GROUP BY`の実行前にJOINをするか、`END GROUP`もしくは`TO STREAM`で`GROUP BY`のストリームから抜けた後にJOINを実行してください。
 
-今現在、MongoDB上にあるデータとの結合が可能です。
-なお、MondoDBから受け取られたデータはEXPIRE句を合わせて指定することでキャッシュされます。
-(EXPIRE句の指定が無い場合はキャッシュは行われません)
 
-指定した時間の間、fetchした内容をキャッシュします。キャッシュしている間に実行されたJOINは、キャッシュから結合フィールドを取得します。
-（指定した時間が過ぎると、キャッシュが更新されます）
+### MongoDBデータとの結合 <a name="MONGO_FETCH" class="anchor"></a>
 
-キャッシュは結合キーごとに保存されます。
+#### Mongo Fetch Processor
 
-    JOIN join_name ON join_condition
-      TO join_fields
-      EXPIRE period
-      USING mongo_fetch(db_name, collection_name)
+MongoDB上にあるデータとの結合が可能です。MongoDBにおけるfind()を実行します。
 
-* db_nameは、入力とするDB名を指定します。
-* collection_nameは、入力とするCollection名を指定します。
+    JOIN .. USING mongo_fetch(db_name, collection_name, mongo_query, fields, limit, expire)
+
+* db_name には、入力とするDB名を指定します。
+* collection_name には、入力とするCollection名を指定します。
+* find_query には、MongoDBにおけるfind()で指定するのと同様の検索条件を指定します。MongoDBの各種関数は使用できません。
+`@フィールド名`もしくは`@フィールド名!`で、クエリにTupleのフィールドを組み込む事ができます(プレースホルダ)。
+`@`をクエリに含む場合は、`\@`のようにエスケープしてください。
+* fields には、MongoDBにおけるfind()で取得するフィールド名を配列形式で指定します。
+* limit には、MongoDBにおけるfind()の取得ドキュメント数を指定します。省略可能です。
+* expire には、MongoDBから受け取られたデータをキャッシュする時間を指定します。省略するとキャッシュは行われません。
 
 > Example:
 >
-    JOIN j1 ON j1.code1 = field1 AND j1.code2 = field2 AND j1.del = 0
-      TO j1.name AS field10, j1.type AS field11
-      EXPIRE 1min
-      USING mongo_fetch('db1', 'col1')
-
+    JOIN field10, field11
+      USING mongo_fetch(
+        'db1',
+        'col1',
+        '{$and: [{code1: @field1}, {code2: @field2}, {del: 0}]}',
+        ['name', 'type'],
+        1,
+        1min
+      )
 
 ### Webサービスとの結合
 
-    JOIN .. ON .. TO .. EXPIRE .. USING web_fetch(..)
+#### Web Fetch Processor
 
 JSON形式のレスポンスを返すWebサービスとの結合か可能です。
 結合条件をクエリパラメータに変換し、指定したURLにアクセスします。
 取得したJSON形式のレスポンスデータの一部を抜き出し、Tupleと結合します。
 
-    JOIN join_name ON join_condition
-      TO join_fields
-      EXPIRE period
-      USING web_fetch(url, replace, path)
+    JOIN .. USING web_fetch(url, path, fields, expire)
 
-* urlには、データを取得するURLを指定します。${query}変数を使用して、URLにクエリパラメータを追加します。
-* replaceには、クエリパラメータの置換ルールを配列で指定します。[変換前文字列1, 変換後文字列1, 変換前文字列2, 変換後文字列2, ...]の形式で指定します。
-* pathには、取得したJSONデータのルートパスを指定します。
+* url には、データを取得するURLを指定します。プレースホルダでTupleのフィールドを指定する事ができます。
+* path には、返却されるJSONの親ノードを指定します。
+* fields には、取得するノード名を配列形式で指定します。
+* expire には、結果をキャッシュする時間を指定します。省略するとキャッシュは行われません。
 
 > Example: Solrのデータと結合する
 >
-    JOIN books ON books.title = ccc AND books.author = ddd
-      TO books.id AS book_id, books.price AS price
-      EXPIRE 10min
-      USING web_fetch('http://localhost:3000/solr/select?q=${query}', [' = ',':', ' AND ', '+AND+'], 'response.docs[0]')
->
-> 置換ルール1: ' = 'を':'に置換
-> 置換ルール2: ' AND 'を'+AND+'に置換
->
-> 元の結合条件:
->
-    books.title = ccc AND books.author = ddd
-> 置換ルール適用後の結合条件:
->
-    books.title:ccc+AND+books.author:ddd
-> ※ ccc, dddの各フィールドは、Tupleの各フィールドの値に置き換えられます。
->
-> アクセスURL:
->
-    http://localhost:3000/solr/select?q=books.title:ccc+AND+books.author:ddd
+    JOIN field10, field11
+      USING web_fetch(
+        'http://localhost:3000/solr/select?q=books.title:@field1+AND+books.author:@field2&fl=id,price&wt=json',
+        'response.docs',
+        ['id', 'price'],
+        10min
+      )
 >
 > レスポンスデータ: pathで指定したパスをルートパスとしてJSONのパースを行います。
 >
@@ -280,6 +261,13 @@ JSON形式のレスポンスを返すWebサービスとの結合か可能です�
         ]
       }
     }
+
+### キャッシュ
+
+Fetch Processorにてキャッシュしている間に実行されたJOIN句は、キャッシュから結合フィールドを取得し、Tupleに結合します。
+指定した時間を過ぎると、再度データを取得し、キャッシュが更新されます。
+
+キャッシュは結合キーごとに保存されます。
 
 ---
 
@@ -723,7 +711,7 @@ TIMESTAMP型のフィールドを、フォーマットした文字列(STRING)に
 
 * 加算(+)
 * 減算(-)
-* 乗算(*)
+* 乗算(\*)
 * 除算(/)
 * 除算(DIV)
 * 剰余(MOD, %)
@@ -760,6 +748,50 @@ TIMESTAMP型のフィールドを、フォーマットした文字列(STRING)に
 > Example:
 >
     EACH field1 * (field2 + 123) AS field3
+
+### 数学関数
+
+#### sqrt
+
+引数で指定された数値フィールドの平方根を計算します。
+
+> Example:
+>
+    EACH sqrt(field1) AS field2
+
+#### sin
+
+引数で指定された数値フィールドをラジアンで表した角度として、正弦(sin)を計算します。
+
+> Example:
+>
+    EACH sin(field1) AS field3
+
+#### cos
+
+引数で指定された数値フィールドをラジアンで表した角度として、余弦(cos)を計算します。
+
+> Example:
+>
+    EACH cos(field1) AS field4
+
+#### tan
+
+引数で指定された数値フィールドをラジアンで表した角度として、正接(tan)を計算します。
+
+> Example:
+>
+    EACH tan(field1) AS field5
+
+### 距離計算
+
+#### distance
+
+Double型のフィールドを、始点X座標、始点Y座標、終点X座標、終点Y座標の順に指定し、始点と終点の距離を計算します。
+
+> Example:
+>
+    EACH distance(x1, y1, x2, y2) AS dis
 
 ---
 
