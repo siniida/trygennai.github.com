@@ -13,7 +13,8 @@ redirect_from: "/index_ja.html"
 * [DML](dml.html)
 * [チュートリアル](tutorial.html)
 * [設定](config.html)
-* [設定例](example.html)
+  * [設定例](example.html)
+  * [メトリクス](metrics.html)
 
 ### genn.ai の実行環境(ローカル用)
 * [vagrant (VM)](https://github.com/trygennai/gennai.vagrant)

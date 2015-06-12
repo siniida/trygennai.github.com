@@ -14,7 +14,8 @@ redirect_from: "/cli_ja.html"
     usage: gungnir
      -e <quoted-command-string>   Command from command line
      -f <filename>                Command from file
-     -h,--help                    Print help information
+     -h                           Print help information
+     -l                           Connect to cluster of local mode
      -p <password>                Password to use when connecting to the
                                   gungnir server
      -u <username>                Username to use when connecting to the

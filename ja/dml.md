@@ -28,12 +28,26 @@ FROM を使い、Tupleの入力元をスキーマとともに指定します。
 
 TupleStoreServerからの入力は、一つのTopologyに対して一つしか定義できません。
 
-#### Kafka Spout Processor
+#### Kafka Spout Processor <a name="KAFKA_SPOUT" class="anchor"></a>
 
 TupleをKafkaから読み込みます。
 [DDL](ddl.html) で説明されている`CREATE TUPLE`にて作成したスキーマからの入力Tuple(RESTで投入)もKafka経由で読み上げます。
 
-    kafka_spout()
+    kafka_spout([offset, [force]])
+
+* offset には、Topicの読み出し位置を指定します。指定可能な値は下記の通りです。
+  * -1 or 省略: Topicの末尾から読み出し
+  * -2: Topicの先頭から読み出し
+* force に`true`を指定すると、Topologyの再起同時に保存されているオフセット情報を利用せず先頭からデータを読み込みます。
+
+
+> Example: Topicの先頭から読み出し
+>
+    FROM userAction1 USING kafka_spout(-2)
+
+> Example: 再起同時に必ずTopicの先頭から読み出し
+>
+    FROM userAction1 USING kafka_spout(-2, true)
 
 #### Memory Spout Processor <a name="MEMORY_SPOUT" class="anchor"></a>
 
@@ -64,9 +78,14 @@ Memory Spout Processorを使用するには、GungnirServerの下記設定項目
 >
 * ここで使われているua1やua2は`CREATE TUPLE`で作られたタプル名、s1はそれらタプルが流れてくるストリーム名です。
 
-### JOIN
+### JOIN <a name="TupleJoin" class="anchor"></a>
 
 複数のTupleをフィールドの値を元に結合します。
+
+結合対象のTupleが未到達の場合、先に到着しているTupleはメモリに保持され結合対象のTupleの到着を待機します。未結合のTupleが多くなると想定される場合、`USING file_cache()`構文を追加することで、Tupleをファイルに一時的に格納することができます。
+ファイルキャッシュは、<a href="/ja/config.html#s.gungnir.local.dir">gungnir.local.dir</a>で指定したディレクトリに作成されます。
+
+`USING file_cache()`構文を省略した場合、もしくは`USING memory_cache()`を明示的に指定した場合には、Tupleはメモリに保存されます。
 
 #### TupleStoreServerからTupleを読み込んで結合 <a name="RestJoin" class="anchor"></a>
 
@@ -76,6 +95,7 @@ TupleStoreServerからTupleを読み込む時点で、複数のTupleを結合し
       JOIN schema_name_2 ON join_condition
       TO join_field
       EXPIRE period
+      [USING file_cache() | memory_cache()]
     ) AS schema_alias USING spout_processor
 
     join_condition:
@@ -106,6 +126,7 @@ TupleStoreServerからTupleを読み込む時点で、複数のTupleを結合し
       JOIN stream_name_2(tuple_name_2) ON join_condition
       TO join_field
       EXPIRE period
+      [USING file_cache()]
     ) AS schema_alias
 
     join_condition:
@@ -128,15 +149,15 @@ TupleStoreServerからTupleを読み込む時点で、複数のTupleを結合し
 
 ---
 
-### Column:「スキーマとタプル」
+#### Column:「スキーマとタプル」
 
 gennaiには、スキーマ(Schema)とタプル(Tuple)という似た定義の言葉が存在します。
 
-#### スキーマ(Schema)
+##### スキーマ(Schema)
 
 TupleStoreServerが受領するJSON形式のデータをタプルに変換する為のルールのようなものです。[`CREATE TUPLE`](ddl.html#CREATE_TUPLE)で定義されます。
 
-#### タプル(Tuple)
+##### タプル(Tuple)
 
 トポロジ(Topology)を流れるデータは、`JOIN`や`EACH`といった各オペレータにて、フィールドそのものや、その保持する値を追加・削除・編集され、タプルの形状を様々に変化させていきます。当初定義されているスキーマとはまったくの別物になることもありますし、スキーマと同じフィールド定義でストリームの終端まで達することもあります。
 
@@ -193,13 +214,13 @@ fetch_processorにて複数のドキュメントが返却された場合、Tuple
 JOINは、`GROUP BY`されたストリームの中で使用することはできません。`GROUP BY`の実行前にJOINをするか、`END GROUP`もしくは`TO STREAM`で`GROUP BY`のストリームから抜けた後にJOINを実行してください。
 
 
-### MongoDBデータとの結合 <a name="MONGO_FETCH" class="anchor"></a>
+### データストアとの結合
 
-#### Mongo Fetch Processor
+#### Mongo Fetch Processor <a name="MONGO_FETCH" class="anchor"></a>
 
 MongoDB上にあるデータとの結合が可能です。MongoDBにおけるfind()を実行します。
 
-    JOIN .. USING mongo_fetch(db_name, collection_name, mongo_query, fields, limit, expire)
+    JOIN .. USING mongo_fetch(db_name, collection_name, mongo_query, fields, sort, limit, expire)
 
 * db_name には、入力とするDB名を指定します。
 * collection_name には、入力とするCollection名を指定します。
@@ -207,10 +228,36 @@ MongoDB上にあるデータとの結合が可能です。MongoDBにおけるfin
 `@フィールド名`もしくは`@フィールド名!`で、クエリにTupleのフィールドを組み込む事ができます(プレースホルダ)。
 `@`をクエリに含む場合は、`\@`のようにエスケープしてください。
 * fields には、MongoDBにおけるfind()で取得するフィールド名を配列形式で指定します。
+* sort には、MongoDBから取得するデータのソート条件を指定します。省略可能です。
 * limit には、MongoDBにおけるfind()の取得ドキュメント数を指定します。省略可能です。
 * expire には、MongoDBから受け取られたデータをキャッシュする時間を指定します。省略するとキャッシュは行われません。
 
-> Example:
+> Example: ソート条件とリミットを指定
+>
+    JOIN field10, field11
+      USING mongo_fetch(
+        'db1',
+        'col1',
+        '{$and: [{code1: @field1}, {code2: @field2}, {del: 0}]}',
+        ['name', 'type'],
+        '{code1: -1}',
+        1,
+        1min
+      )
+
+> Example: ソート条件のみ指定
+>
+    JOIN field10, field11
+      USING mongo_fetch(
+        'db1',
+        'col1',
+        '{$and: [{code1: @field1}, {code2: @field2}, {del: 0}]}',
+        ['name', 'type'],
+        '{code1: -1}',
+        1min
+      )
+
+> Example: リミット条件のみ指定
 >
     JOIN field10, field11
       USING mongo_fetch(
@@ -222,9 +269,30 @@ MongoDB上にあるデータとの結合が可能です。MongoDBにおけるfin
         1min
       )
 
+#### JDBC Fetch Processor <a name="JDBC_FETCH" class="anchor"></a>
+
+RDB上にあるデータとの結合が可能です。デフォルトではDriverはMySQLになっています。
+
+    JOIN .. USING jdbc_fetch(connect, user, password, query, expire)
+
+* connect には、RDBへの接続文字列を指定します。
+* user には、RDBにログインする為のユーザを指定します。
+* password には、RDBにログインするユーザのパスワードを指定します。
+* query には、RDBに対して実行するクエリを指定します。`@フィールド名`もしくは`@フィールド名!`で、クエリにTupleのフィールドを組み込むことができます(プレースホルダ)。`@`をクエリに含む場合は、`\@`のようにエスケープしてください。
+* expire には、RDBから取得したデータをキャッシュする時間を指定します。省略するとキャッシュは行われません。
+
+> Example:
+>
+    JOIN f2, f3 USING jdbc_fetch(
+      'jdbc:mysql://localhost/db1',
+      'gennai',
+      'gennai',
+      'SELECT field2, field3 FROM test WHERE field1 = @f1'
+    )
+
 ### Webサービスとの結合
 
-#### Web Fetch Processor
+#### Web Fetch Processor <a name="WEB_FETCH" class="anchor"></a>
 
 JSON形式のレスポンスを返すWebサービスとの結合か可能です。
 結合条件をクエリパラメータに変換し、指定したURLにアクセスします。
@@ -532,266 +600,15 @@ EACH は、Tupleの集計や編集を実行します。
 
 field1はそのまま、field6.member1をfield10フィールドへ、field7&#91;'visa'&#93;をvisaフィールドへ抽出します。
 
-
-### 集計関数
-
-#### count
-
-Tupleの到着数をカウントします。
-
-    count([DISTINCT] [field])
-
-* fieldを指定すると、指定したフィールドが存在するTupleのみカウント対象となります。
-* DISTINCTを指定すると、指定したフィールドの一意なTupleをカウントします。
-
-> Example: 到着したTupleを全てカウント
->
-    EACH count() AS cnt1
-
-> Example: 到着したTupleのうち、field1フィールドが存在するTupleをカウント
->
-    EACH count(field1) AS cnt2
-
-> Example: 到着したTupleのうち、field1フィールドが存在し、かつ一意なTupleをカウント
->
-    EACH count(DISTINCT field1) AS cnt3
-
-> Example: 複数のフィールドに対して、一意なTupleをカウント
->
-    EACH count(DISTINCT concat(field1, ifnull(field2, -))) AS cnt4
-
-
-#### sum
-
-到着したフィールドの値を合計します。
-
-    sum([DISTINCT] field)
-
-* fieldの指定は必須です。指定したフィールドが存在するTupleの値を合計します。
-* DISTINCTを指定すると、指定したフィールドの一意なTupleの値を合計します。
-
-> Example: 到着したTupleのうち、field1フィールドが存在するTupleの値を合計
->
-    EACH sum(field1) AS sum1
-
-> Example: 到着したTupleのうち、field1フィールドが存在し、かつ一意なTupleの値を合計
->
-    EACH sum(DISTINCT field1) AS sum2
-
-#### avg
-
-到着したフィールドの値の平均を計算します。
-
-    avg([DISTINCT] field)
-
-* fieldの指定は必須です。指定したフィールドが存在するTupleの値の平均を計算します。
-* DISTINCTを指定すると、指定したフィールドの一意なTupleの値の平均を計算します。
-
-> Example: 到着したTupleのうち、field1フィールドが存在するTupleの値の平均を計算
->
-    EACH avg(field1) AS avg1
-
-> Example: 到着したTupleのうち、field1フィールドが存在し、かつ一意なTupleの値の平均を計算
->
-    EACH avg(DISTINCT field1) AS avg2
-
-### 編集関数
-
-#### ifnull
-
-フィールドの値がNULLであれば、代替の値で置き換えます。
-
-> Example:
->
-    EACH ifnull(field1, 0) AS field1
-
-#### concat
-
-STRING型のフィールドの値を連結したフィールドを作成します。
-
-> Example:
->
-    EACH concat(field1, '-', field2) AS new_field
-
-#### split
-
-フィールドの値を区切り文字列もしくは正規表現によってリストに変換します。
-
-    split(string str, string pattern)
-
-* strには、対象フィールドを指定します。
-* patternには、区切り文字列もしくは正規表現で指定します。
-
-> Example:
->
-    EACH split(field1, ',') AS new_list
-
-#### regexp_extract
-
-フィールドの値から正規表現によって値を抜き出します。
-
-    regexp_extract(string subject, string pattern, int index)
-
-* subjectには、対象フィールドを指定します。
-* patternには、正規表現パターンを指定します。
-* indexには、抜き出すグループの番号を指定します。
-
-> Example:
->
-    EACH regexp_extract(field1, '(\d{4})-(\d{2})-(\d{2})', 1) AS new_field
-
-#### parse_url
-
-フィールドの値(URL)をパースして、一部を返します。
-
-    parse_url(string urlString, string partToExtract [, string keyToExtract])
-
-* urlStringには、パースするURLフィールドを指定します。
-* partToExtractには、下記のいずれかを指定します。
-    * HOST
-    * PATH
-    * QUERY
-    * REF
-    * PROTOCOL
-    * AUTHORITY
-    * FILE
-    * USERINFO
-* keyToExtractには、partToExtractがQUERYの場合、取得するパラメータ名称を指定します。
-
-> Example:
->
-    EACH parse_url(urlField, 'QUERY', 'k1') AS new_field
-
-#### cast
-
-フィールドの値を指定した型に変換します。
-
-    cast(expr as type)
-
-* exprには、対象フィールドを指定します。
-* typeには、下記の型のみ指定可能です。
-    * TIMESTAMP
-    * TINYINT
-    * SMALLINT
-    * INT
-    * BIGINT
-    * FLOAT
-    * DOUBLE
-    * BOOLEAN
-
-> Example:
->
-    EACH cast(field1 AS TIMESTAMP('yyyyMMddHHmmss')) AS new_field
-
-![Alt text](/img/underconstruction.png)
-定数に関しては、関数の種類が増えてきてから改めて記述する予定です。
-
-#### date_format
-
-TIMESTAMP型のフィールドを、フォーマットした文字列(STRING)に変換します。
-
-    date_foramt(field AS string)
-
-* fieldには、TIMESTAMP型のフィールドを指定します。
-* stringには、パターン文字列を指定します。
-
-パターン文字列には、[java/text/SimpleDateFormat](https://docs.oracle.com/javase/jp/6/api/java/text/SimpleDateFormat.html)と同じ書式を採用しています。
-
-> Example:
->
-    EACH date_format(field1, 'yyyy-MM-dd-HH-mm') field2
-
-> Example: 日時文字列(yyyyMMdd)をTIMESTAMP型に変換し、日付のみ取得
->
-    EACH date_format(cast(field1 AS TIMESTAMP('yyyyMMdd')) AS 'dd') AS field2
-
-### 四則演算
-
-数値型フィールドでは下記の四則演算が可能です。
-
-* 加算(+)
-* 減算(-)
-* 乗算(\*)
-* 除算(/)
-* 除算(DIV)
-* 剰余(MOD, %)
-
-#### 数値型フィールド同士の演算
-
-数値型フィールド同士での四則演算が可能です。
-
-> Example:
->
-    EACH field1 + field2 AS field3
-    EACH field1 DIV field2 AS field3
-
-#### 数値型フィールドと数値の演算
-
-数値型フィールドと数値の四則演算が可能です。
-
-> Example:
->
-    EACH field1 * 2 AS field3
-
-#### 関数を組み合わせた演算
-
-数値型フィールドと集計関数を組み合わせた四則演算が可能です。
-
-> Example:
->
-    EACH sum(field1 * 10) * count() AS field3
-
-#### 演算の優先順位
-
-括弧を用いて、四則演算の優先順位を変更する事が可能です。
-
-> Example:
->
-    EACH field1 * (field2 + 123) AS field3
-
-### 数学関数
-
-#### sqrt
-
-引数で指定された数値フィールドの平方根を計算します。
-
-> Example:
->
-    EACH sqrt(field1) AS field2
-
-#### sin
-
-引数で指定された数値フィールドをラジアンで表した角度として、正弦(sin)を計算します。
-
-> Example:
->
-    EACH sin(field1) AS field3
-
-#### cos
-
-引数で指定された数値フィールドをラジアンで表した角度として、余弦(cos)を計算します。
-
-> Example:
->
-    EACH cos(field1) AS field4
-
-#### tan
-
-引数で指定された数値フィールドをラジアンで表した角度として、正接(tan)を計算します。
-
-> Example:
->
-    EACH tan(field1) AS field5
-
-### 距離計算
-
-#### distance
-
-Double型のフィールドを、始点X座標、始点Y座標、終点X座標、終点Y座標の順に指定し、始点と終点の距離を計算します。
-
-> Example:
->
-    EACH distance(x1, y1, x2, y2) AS dis
+### 関数
+
+`EACH`句では下記関数を使用することができます。
+
+* <a href="#total_functions">集計関数</a>
+* <a href="#edit_functions">編集関数</a>
+* <a href="#operation_functions">四則演算</a>
+* <a href="#math_functions">数学関数</a>
+* <a href="#distance_functions">距離計算</a>
 
 ---
 
@@ -901,6 +718,17 @@ LENGTHにスライドするTupleの数を指定します。
 ウィンドウ領域に保存するTupleは、集計に必要なフィールドのみを選択しています。
 スライドに使用する領域は現在メモリになっていますが、将来的に外部DBへの差し替えを予定。
 
+### 関数
+
+`SLIDE`句では下記関数が使用できます。
+
+* <a href="#total_functions">集計関数</a>
+* <a href="#edit_functions">編集関数</a>
+* <a href="#operation_functions">四則演算</a>
+* <a href="#math_functions">数学関数</a>
+* <a href="#distance_functions">距離計算</a>
+* <a href="#list_functions">リストフィールド操作関数</a>
+* <a href="#stack_functions">スタック関数</a>
 
 ---
 
@@ -945,6 +773,18 @@ cronの書式は、[Quartz](http://www.quartz-scheduler.org/documentation/quartz
 指定した回数分のTupleが届いたタイミングで、集計結果が次の処理に送られます。
 集計結果は10件毎にリセットされます。
 
+### 関数
+
+`SNAPSHOT`句では下記関数が使用できます。
+
+* <a href="#total_functions">集計関数</a>
+* <a href="#edit_functions">編集関数</a>
+* <a href="#operation_functions">四則演算</a>
+* <a href="#math_functions">数学関数</a>
+* <a href="#distance_functions">距離計算</a>
+* <a href="#list_functions">リストフィールド操作関数</a>
+* <a href="#stack_functions">スタック関数</a>
+
 ---
 
 ## GROUP
@@ -956,20 +796,17 @@ BEGIN GROUP ... END GROUP で囲まれたクエリを、グループで実行し
 
 * field には、グループ化するフィールドの名前を指定します。
 
-### EACH をグループで実行
-
-> Example:
+> Example: EACH をグループ毎に実行
 >
     BEGIN GROUP BY user_name
     EACH user_name, count() AS gc1
     EMIT * USING mongo_persist('db1', 'col2', 'user_name');
     END GROUP
+>
+> user_name ごと（ユーザごと）にTupleがカウントされます。
 
-user_name ごと（ユーザごと）にTupleがカウントされます。
 
-### FILTER GROUP をグループで実行
-
-> Example:
+> Example: FILTER GROUP をグループ毎に実行
 >
     BEGIN GROUP BY user_name
     FILTER GROUP EXPIRE 1DAYS
@@ -977,9 +814,9 @@ user_name ごと（ユーザごと）にTupleがカウントされます。
       (ua2.field1 <= 30 AND ua2.field2.member3 BETWEEN 2 AND 7) OR ua3.field5 LIKE 'A%'
     EMIT * USING mongo_persist('db1', 'col3')
     END GROUP
-
-user_nameごとに（ユーザごとに）フィルタが判定されます。
-特定のユーザが条件１と条件２を満たしているかを判定し、FILTER GROUP の状態はユーザごとに保持されます。
+>
+> user_nameごとに（ユーザごとに）フィルタが判定されます。
+> 特定のユーザが条件１と条件２を満たしているかを判定し、FILTER GROUP の状態はユーザごとに保持されます。
 
 ### GROUP のネスト
 
@@ -1027,7 +864,7 @@ EMITは、Tupleをトポロジの外部へ出力します。
 
 ### 外部への出力
 
-#### Kafka Emit Processor
+#### Kafka Emit Processor <a name="KAFKA_EMIT" class="anchor"></a>
 
 TupleをKafkaに出力します。
 
@@ -1049,15 +886,16 @@ TupleをKafkaに出力します。
     EMIT * USING kafka_emit('topic1', 'csv');
 
 
-#### Mongo Persist Processor
+#### Mongo Persist Processor <a name="MONGO_PERSIST" class="anchor"></a>
 
 TupleをMongoDBに出力します。
 
-    mongo_persist(db_name, collection_name [, key_names])
+    mongo_persist(db_name, collection_name [, index [, key_names]])
 
 
 * db_name には、出力するDB名を指定します。db_name は [プロセッサ変数](dml.html#procparam) に対応しています。
 * collection_name には、出力するCollection名を指定します。collection_name は [プロセッサ変数](dml.html#procparam) に対応しています。
+* index には、`true`もしくは`false`を指定します。対象のcollectionにインデックスを作成します。省略するとインデックスは作成されません。
 * key_names には、出力するキーのフィールド名を指定します。複合キーの場合は配列で指定してください。
  key_names を指定した場合、出力はキーに対してupdateされます。
  key_names を指定しなかった場合は、出力はinsertになります。
@@ -1065,8 +903,28 @@ TupleをMongoDBに出力します。
 > Example:
 >
     mongo_persist('db1', 'col1')  <- insert
-    mongo_persist('db1', 'col1', 'field2') <- field2 をキーとしてupdate
-    mongo_persist('db1', 'col1', ['field2', 'field3']) <- field2 + field3 を複合キーとしてupdate
+    mongo_persist('db1', 'col1', true, 'field2') <- field2 をキーとしてupdate、インデックスを作成
+    mongo_persist('db1', 'col1', false, ['field2', 'field3']) <- field2 + field3 を複合キーとしてupdate、インデックスを作成しない
+
+#### JDBC Persist Processor <a name="JDBC_PERSIST" class="anchor"></a>
+
+TupleをRDBに出力します。 
+
+    jdbc_persist(connect, user, password, query)
+
+* connect には、RDBへの接続文字列を指定します。
+* user には、RDBにログインする為のユーザを指定します。
+* password には、RDBにログインするユーザのパスワードを指定します。
+* query には、RDBに対して実行するクエリを指定します。`@フィールド名`もしくは`@フィールド名!`で、クエリにTupleのフィールドを組み込むことができます(プレースホルダ)。`@`をクエリに含む場合は、`\@`のようにエスケープしてください。
+
+> Example:
+>
+    EMIT * USING jdbc_persist(
+      'jdbc:mysql://localhost/db1',
+      'gennai',
+      'gennai',
+      'INSERT INTO output (field1, field2) VALUES (@f1, @f2)'
+    )
 
 #### Web Emit Processor
 
@@ -1121,3 +979,319 @@ ${ACCOUNT_ID} は、Topologyを起動したユーザのAccount IDに置き換え
 > Example:
 >
     kafka_emit('topic_${TOPOLOGY_ID}')
+
+---
+
+## 関数 <a name="functions" class="anchor"></a>
+
+### 集計関数 <a name="total_functions" class="anchor"></a>
+
+#### count
+
+Tupleの到着数をカウントします。
+
+    count([DISTINCT] [field])
+
+* fieldを指定すると、指定したフィールドが存在するTupleのみカウント対象となります。
+* DISTINCTを指定すると、指定したフィールドの一意なTupleをカウントします。
+
+> Example: 到着したTupleを全てカウント
+>
+    EACH count() AS cnt1
+
+> Example: 到着したTupleのうち、field1フィールドが存在するTupleをカウント
+>
+    EACH count(field1) AS cnt2
+
+> Example: 到着したTupleのうち、field1フィールドが存在し、かつ一意なTupleをカウント
+>
+    EACH count(DISTINCT field1) AS cnt3
+
+> Example: 複数のフィールドに対して、一意なTupleをカウント
+>
+    EACH count(DISTINCT concat(field1, ifnull(field2, -))) AS cnt4
+
+#### sum
+
+到着したフィールドの値を合計します。
+
+    sum([DISTINCT] field)
+
+* fieldの指定は必須です。指定したフィールドが存在するTupleの値を合計します。
+* DISTINCTを指定すると、指定したフィールドの一意なTupleの値を合計します。
+
+> Example: 到着したTupleのうち、field1フィールドが存在するTupleの値を合計
+>
+    EACH sum(field1) AS sum1
+
+> Example: 到着したTupleのうち、field1フィールドが存在し、かつ一意なTupleの値を合計
+>
+    EACH sum(DISTINCT field1) AS sum2
+
+#### avg
+
+到着したフィールドの値の平均を計算します。
+
+    avg([DISTINCT] field)
+
+* fieldの指定は必須です。指定したフィールドが存在するTupleの値の平均を計算します。
+* DISTINCTを指定すると、指定したフィールドの一意なTupleの値の平均を計算します。
+
+> Example: 到着したTupleのうち、field1フィールドが存在するTupleの値の平均を計算
+>
+    EACH avg(field1) AS avg1
+
+> Example: 到着したTupleのうち、field1フィールドが存在し、かつ一意なTupleの値の平均を計算
+>
+    EACH avg(DISTINCT field1) AS avg2
+
+### 編集関数 <a name="edit_functions" class="anchor"></a>
+
+#### ifnull
+
+フィールドの値がNULLであれば、代替の値で置き換えます。
+
+> Example:
+>
+    EACH ifnull(field1, 0) AS field1
+
+#### concat
+
+STRING型のフィールドの値を連結したフィールドを作成します。
+
+> Example:
+>
+    EACH concat(field1, '-', field2) AS new_field
+
+#### split
+
+フィールドの値を区切り文字列もしくは正規表現によってリストに変換します。
+
+    split(string str, string pattern)
+
+* strには、対象フィールドを指定します。
+* patternには、区切り文字列もしくは正規表現で指定します。
+
+> Example:
+>
+    EACH split(field1, ',') AS new_list
+
+#### regexp_extract
+
+フィールドの値から正規表現によって値を抜き出します。
+
+    regexp_extract(string subject, string pattern, int index)
+
+* subjectには、対象フィールドを指定します。
+* patternには、正規表現パターンを指定します。
+* indexには、抜き出すグループの番号を指定します。
+
+> Example:
+>
+    EACH regexp_extract(field1, '(\d{4})-(\d{2})-(\d{2})', 1) AS new_field
+
+#### parse_url
+
+フィールドの値(URL)をパースして、一部を返します。
+
+    parse_url(string urlString, string partToExtract [, string keyToExtract])
+
+* urlStringには、パースするURLフィールドを指定します。
+* partToExtractには、下記のいずれかを指定します。
+    * HOST
+    * PATH
+    * QUERY
+    * REF
+    * PROTOCOL
+    * AUTHORITY
+    * FILE
+    * USERINFO
+* keyToExtractには、partToExtractがQUERYの場合、取得するパラメータ名称を指定します。
+
+> Example:
+>
+    EACH parse_url(urlField, 'QUERY', 'k1') AS new_field
+
+#### cast
+
+フィールドの値を指定した型に変換します。
+
+    cast(expr as type)
+
+* exprには、対象フィールドを指定します。
+* typeには、下記の型のみ指定可能です。
+    * TIMESTAMP
+    * TINYINT
+    * SMALLINT
+    * INT
+    * BIGINT
+    * FLOAT
+    * DOUBLE
+    * BOOLEAN
+
+> Example:
+>
+    EACH cast(field1 AS TIMESTAMP('yyyyMMddHHmmss')) AS new_field
+
+![Alt text](/img/underconstruction.png)
+定数に関しては、関数の種類が増えてきてから改めて記述する予定です。
+
+#### date_format
+
+TIMESTAMP型のフィールドを、フォーマットした文字列(STRING)に変換します。
+
+    date_foramt(field AS string)
+
+* fieldには、TIMESTAMP型のフィールドを指定します。
+* stringには、パターン文字列を指定します。
+
+パターン文字列には、[java/text/SimpleDateFormat](https://docs.oracle.com/javase/jp/6/api/java/text/SimpleDateFormat.html)と同じ書式を採用しています。
+
+> Example:
+>
+    EACH date_format(field1, 'yyyy-MM-dd-HH-mm') field2
+
+> Example: 日時文字列(yyyyMMdd)をTIMESTAMP型に変換し、日付のみ取得
+>
+    EACH date_format(cast(field1 AS TIMESTAMP('yyyyMMdd')) AS 'dd') AS field2
+
+### 四則演算 <a name="operation_functions" class="anchor"></a>
+
+数値型フィールドでは下記の四則演算が可能です。
+
+* 加算(+)
+* 減算(-)
+* 乗算(\*)
+* 除算(/)
+* 除算(DIV)
+* 剰余(MOD, %)
+
+#### 数値型フィールド同士の演算
+
+数値型フィールド同士での四則演算が可能です。
+
+> Example:
+>
+    EACH field1 + field2 AS field3
+    EACH field1 DIV field2 AS field3
+
+#### 数値型フィールドと数値の演算
+
+数値型フィールドと数値の四則演算が可能です。
+
+> Example:
+>
+    EACH field1 * 2 AS field3
+
+#### 関数を組み合わせた演算
+
+数値型フィールドと集計関数を組み合わせた四則演算が可能です。
+
+> Example:
+>
+    EACH sum(field1 * 10) * count() AS field3
+
+#### 演算の優先順位
+
+括弧を用いて、四則演算の優先順位を変更する事が可能です。
+
+> Example:
+>
+    EACH field1 * (field2 + 123) AS field3
+
+### 数学関数 <a name="math_functions" class="anchor"></a>
+
+#### sqrt
+
+引数で指定された数値フィールドの平方根を計算します。
+
+> Example:
+>
+    EACH sqrt(field1) AS field2
+
+#### sin
+
+引数で指定された数値フィールドをラジアンで表した角度として、正弦(sin)を計算します。
+
+> Example:
+>
+    EACH sin(field1) AS field3
+
+#### cos
+
+引数で指定された数値フィールドをラジアンで表した角度として、余弦(cos)を計算します。
+
+> Example:
+>
+    EACH cos(field1) AS field4
+
+#### tan
+
+引数で指定された数値フィールドをラジアンで表した角度として、正接(tan)を計算します。
+
+> Example:
+>
+    EACH tan(field1) AS field5
+
+### 距離計算 <a name="distance_functions" class="anchor"></a>
+
+#### distance
+
+Double型のフィールドを、始点X座標、始点Y座標、終点X座標、終点Y座標の順に指定し、始点と終点の距離を計算します。
+
+> Example:
+>
+    EACH distance(x1, y1, x2, y2) AS dis
+
+### リストフィールド操作関数 <a name="list_functions" class="anchor"></a>
+
+#### size
+
+リスト型フィールドのサイズを取得します。
+
+    size(field)
+
+> Example:
+>
+    EACH size(field2) AS list_size
+
+#### slice
+
+リスト型フィールドから指定範囲を取得します。
+
+    slice(field, begin[, end])
+
+* begin には、取得開始位置を指定します。
+* end には、取得完了位置を指定します。省略すると末尾まで取得します。
+
+> Example: 3番目から最後まで取得
+>
+    slice(field1, 2)
+
+> Example: 先頭から3番目まで取得
+>
+    slice(field1, 0, 2)
+
+> Example: 先頭から、最後から2番目までを取得
+>
+    slice(field1, 0, -1)
+
+> Example: 最後から5番目以降を取得
+>
+    slice(field1, -4)
+
+### スタック関数 <a name="stack_functions" class="anchor"></a>
+
+フィールドの値をスタックすることができます。 `SLIDE`句と`LIMIT`句でのみ使用可能です。
+
+#### collect_list
+
+    collect_list(field)
+
+重複しているフィールドの値もスタックします。フィールド値は順番通りに保持されます。
+
+#### collect_set
+
+    collect_set(field)
+
+重複しているフィールドの値はスタックされません。重複したフィールドの値がある場合、順番は保持されません。
