@@ -16,6 +16,9 @@ genn.aiを利用する環境を準備するには下記の方法があります�
 * [Dockerを利用](#docker)
   * [公開Dockerイメージを利用](#dockerimage)
   * [Dockerfileから構築](#dockerfile)
+    * [all in one](#docker-allinone)
+    * [standalone](#docker-standalone)
+    * [cluster](#docker-cluster)
 * [EC2@AWSを利用](#ec2)
   * [コミュニティAMIを利用](#public-ami)
 
@@ -82,12 +85,18 @@ DockerHubからイメージをダウンロードして利用します。
 
 ### Dockerfileから構築 <a name="dockerfile" class="anchor"></a>
 
-ダウンロードしたDockefileからDockerイメージを構築します。
+`git clone`したDockefileからDockerイメージを構築します。Dockerfileは下記の3種類があります。使用状況に合わせて選択してください。
+
+* **all in one** : 1つのDockerコンテナ上で全てのサービスを稼動
+* **standalone** : 1つのDockerコンテナ上でstandaloneモードで稼動
+* **cluster** : 複数のDockerコンテナ上にサービスを稼動(docker-composeが必要)
+
+#### all in one <a name="docker-allinone" class="anchor"></a>
 
     $ git clone https://github.com/siniida/gennai.docker
     $ cd gennai.docker
     $ docker build -t gennai .
-    $ docker run -t -i gennai /bin/bash
+    $ docker run -ti --rm gennai /bin/bash
 
 ※ コンテナには十分なメモリを割り当ててください。
 
@@ -100,12 +109,39 @@ DockerHubからイメージをダウンロードして利用します。
     [root@{CONTAINER ID} /]# service storm-supervisor start
     [root@{CONTAINER ID} /]# service gungnir-server start
     [root@{CONTAINER ID} /]# service tuple-store-server start
-    [root@{CONTAINER ID} /]# su - gennai
-    [gennai@{CONTAINER ID} ~]$ 
-
-以降、gungnirコマンドを使用して、gennaiを使用することができます。
+    [root@{CONTAINER ID} /]# /opt/gungnir-client/bin/gungnir -u root -p gennai
 
 ここで起動されるgenn.ai環境は[疑似分散モード](/ja/config.html#mode.pseudo)です。必要に応じて設定を変更し各種サービスを再起動してください。
+
+#### standalone <a name="docker-standalone" class="anchor"></a>
+
+    $ git clone https://github.com/siniida/gennai.docker
+    $ cd gennai.docker
+    $ git checkout standalone
+    $ docker build -t standalone .
+    $ docker run -ti --rm standalone
+    Pidfile: ./../gungnir-server.pid
+    Using config file: ./../conf/gungnir-standalone.yaml
+    Starting Gungnir server ... STARTED
+    Gungnir server connecting ...
+    Gungnir version 0.0.1 build at 20150612-102002
+    Welcome root (Account ID: 45b6fefc487547539f720ac974f2157c)
+    gungnir>
+
+ここで起動されるgenn.ai環境は[ローカルモード](/ja/config.html#mode.local)です。いくつかの制限事項もありますので注意してください。
+
+#### cluster <a name="docker-cluster" class="anchor"></a>
+
+    $ git clone https://github.com/siniida/gennai.docker
+    $ cd gennai.docker
+    $ git checkout cluster
+    $ docker-compose up
+
+ここで起動されるgenn.ai環境は[完全分散モード](/ja/config.html#mode.distributed)です。
+
+別ターミナルにてクライアントを実行します。
+
+    $ ./client.sh
 
 ## EC2@AWSを利用 <a name="ec2" class="anchor"></a>
 
