@@ -1,6 +1,6 @@
 ---
 layout: manual_ja
-title: Setting / genn.ai
+title: 設定 / genn.ai
 redirect_from: "/config_ja.html"
 ---
 
@@ -20,9 +20,9 @@ genn.aiで使用している主な設定ファイルは下記の2つです。
 
 ここでは、genn.aiが稼働する下記3つのモードについて記載します。
 
-* ローカルモード
-* 疑似分散モード
-* 完全分散モード
+* [ローカルモード](#mode.local)
+* [疑似分散モード](#mode.pseudo)
+* [完全分散モード](#mode.distributed)
 
 ### ローカルモード <a name="mode.local" class="anchor"></a>
 
@@ -124,15 +124,15 @@ GungnirServerとTupleStoreServerが、それぞれ別プロセスとして稼働
 
 [クライアントツール](cli.html)(gungnir, post)がアクセスするGungnirServerのHostを、名前解決が可能なホスト名かIPで指定します。GungnirServerが稼働しているホスト以外からのアクセス時に設定をする必要があります。
 
-この設定値が使用されるのは、GungnirServerが **ローカルモード** で稼働している場合です。 **分散モード**(疑似分散/完全分散)で稼働している場合には、ここで設定した値は使用されず、<a href="#c.cluster.zookeeper.servers">cluster.zookeeper.servers</a>で指定したZooKeeperアンサンブルから接続先のGungnirServerの情報(host/port)を取得します。
+この設定値が使用されるのは、GungnirServerが **ローカルモード** で稼働している場合です。 **分散モード**(疑似分散/完全分散)で稼働している場合には、ここで設定した値は使用されず、[cluster.zookeeper.servers](#c.cluster.zookeeper.servers)で指定したZooKeeperアンサンブルから接続先のGungnirServerの情報(host/port)を取得します。
 
 > Default: "localhost"
 
 #### gungnir.server.port <a name="c.gungnir.server.port" class="anchor"></a>
 
-[クライアントツール](cli.html)(gungnir, post)がアクセスするGungnirServerのPort番号を指定します。GungnirServerの設定において、<a href="#s.gungnir.server.port">gungnir.server.port</a>を変更している場合に設定をする必要があります。
+[クライアントツール](cli.html)(gungnir, post)がアクセスするGungnirServerのPort番号を指定します。GungnirServerの設定において、[gungnir.server.port](#s.gungnir.server.port)を変更している場合に設定をする必要があります。
 
-この設定値が使用されるのは、GungnirServerが **ローカルモード** で稼働している場合です。 **分散モード**(疑似分散/完全分散)で稼働している場合には、ここで設定した値は使用されず、<a href="#c.cluster.zookeeper.servers">cluster.zookeeper.servers</a> で指定したZooKeeperアンサンブルから接続先のGungnirServerの情報(host/port)を取得します。
+この設定値が使用されるのは、GungnirServerが **ローカルモード** で稼働している場合です。 **分散モード**(疑似分散/完全分散)で稼働している場合には、ここで設定した値は使用されず、[cluster.zookeeper.servers](#c.cluster.zookeeper.servers)で指定したZooKeeperアンサンブルから接続先のGungnirServerの情報(host/port)を取得します。
 
 > Default: 7100
 
@@ -142,15 +142,15 @@ GungnirServerとTupleStoreServerが、それぞれ別プロセスとして稼働
 
 [クライアントツール](cli.html)(gungnir, post)がアクセスするTupleStoreServerのHostを、名前解決が可能なホスト名かIPで指定します。TupleStoreServerが稼働しているホスト以外からのアクセス時に設定をする必要があります。
 
-この設定値が使用されるのは、TupleStoreServerが **ローカルモード** で稼働している場合です。 **分散モード**(疑似分散/完全分散)で稼働している場合には、ここで設定した値は使用されず、<a href="#c.cluster.zookeeper.servers">cluster.zookeeper.servers</a>で指定したZooKeeperアンサンブルから接続先のTupleStoreServerの情報(host/port)を取得します。
+この設定値が使用されるのは、TupleStoreServerが **ローカルモード** で稼働している場合です。 **分散モード**(疑似分散/完全分散)で稼働している場合には、ここで設定した値は使用されず、[cluster.zookeeper.servers](#c.cluster.zookeeper.servers)で指定したZooKeeperアンサンブルから接続先のTupleStoreServerの情報(host/port)を取得します。
 
 > Default: "localhost"
 
 #### tuple.store.server.port <a name="c.tuple.store.server.port" class="anchor"></a>
 
-[クライアントツール](cli.html)(gungnir, post)がアクセスするTupleStoreServerのPort番号を指定します。GungnirServer/TupleStoreServerの設定において、<a href="#s.tuple.store.server.port">tuple.store.server.port</a>を変更している場合に設定をする必要があります。
+[クライアントツール](cli.html)(gungnir, post)がアクセスするTupleStoreServerのPort番号を指定します。GungnirServer/TupleStoreServerの設定において、[tuple.store.server.port](#s.tuple.store.server.port)を変更している場合に設定をする必要があります。
 
-この設定値が使用されるのは、TupleStoreServerが **ローカルモード** で稼働している場合です。 **分散モード**(疑似分散/完全分散)で稼働している場合には、ここで設定した値は使用されず、<a href="#c.cluster.zookeeper.servers">cluster.zookeeper.servers</a>で指定したZooKeeperアンサンブルから接続先のTupleStoreServerの情報(host/port)を取得します。
+この設定値が使用されるのは、TupleStoreServerが **ローカルモード** で稼働している場合です。 **分散モード**(疑似分散/完全分散)で稼働している場合には、ここで設定した値は使用されず、[cluster.zookeeper.servers](#c.cluster.zookeeper.servers)で指定したZooKeeperアンサンブルから接続先のTupleStoreServerの情報(host/port)を取得します。
 
 > Default: 7200
 
@@ -160,7 +160,7 @@ GungnirServerとTupleStoreServerが、それぞれ別プロセスとして稼働
 
 設定可能な値は **local** (ローカルモード)/ **distributed** (分散モード)です。
 
-分散モード(疑似分散/完全分散)を指定している場合、<a href="#c.gungnir.server.host">gungnir.server.host</a>, <a href="#c.gungnir.server.port">gungnir.server.port</a>, <a href="#c.tuple.store.server.host">tuple.store.server.host</a>, <a href="#c.tuple.store.server.port">tuple.store.server.port</a>の各設定値は使用されません。[クライアントツール](cli.html)(gungnir, post)が接続するGungnirServer/TupleStoreServerに関する情報は<a href="#c.cluster.zookeeper.servers">cluster.zookeeper.servers</a>で指定したZooKeeperアンサンブルから取得します。
+分散モード(疑似分散/完全分散)を指定している場合、[gungnir.server.host](#c.gungnir.server.host), [gungnir.server.port](#c.gungnir.server.port), [tuple.store.server.host](#c.tuple.store.server.host), [tuple.store.server.port](#c.tuple.store.server.port)の各設定値は使用されません。[クライアントツール](cli.html)(gungnir, post)が接続するGungnirServer/TupleStoreServerに関する情報は[cluster.zookeeper.servers](#c.cluster.zookeeper.servers)で指定したZooKeeperアンサンブルから取得します。
 
 > Default: "distributed"
 
@@ -168,7 +168,7 @@ GungnirServerとTupleStoreServerが、それぞれ別プロセスとして稼働
 
 GungnirServer/TupleStoreServerの各設定を保存するZooKeeperアンサンブルを構成するZooKeeperサーバをリスト形式で指定します。`[host|IP]:[port]`の書式で指定します。
 
-この設定は、分散モード(疑似分散/完全分散)時にのみ使用されます。<a href="#c.gungnir.server.host">gungnir.server.host</a>, <a href="#c.gungnir.server.port">gungnir.server.port</a>, <a href="#c.tuple.store.server.host">tuple.store.server.host</a>, <a href="#c.tuple.store.server.port">tuple.store.server.port</a>の各設定値は、指定したZooKeeperが構成するアンサンブルから取得して使用されます。
+この設定は、分散モード(疑似分散/完全分散)時にのみ使用されます。[gungnir.server.host](#c.gungnir.server.host), [gungnir.server.port](#c.gungnir.server.port), [tuple.store.server.host](#c.tuple.store.server.host), [tuple.store.server.port](#c.tuple.store.server.port)の各設定値は、指定したZooKeeperが構成するアンサンブルから取得して使用されます。
 
 > Default: - "localhost:2181"
 
@@ -218,6 +218,24 @@ GungnirServer/TupleStoreServerの各設定を保存するZooKeeperアンサン�
 [クライアントツール](cli.html)(gungnir, post)がGungnirServer/TupleStoreServerからのレスポンスを待つ最大許容時間をミリ秒で指定します。指定時間内にGungnirServer/TupleStoreServerからのレスポンスが無い場合、クライアントツールは処理を中断します。
 
 > Default: 10000
+
+#### log.receiver.host <a name="c.log.receiver.host" class="anchor"></a>
+
+[クエリのデバッグ](query.html)時に、Topologyが出力するログを転送するホストを指定します。基本的にはネットワークインターフェースから自動でIPを取得する為、設定をする必要はありません。
+
+> Default: "localhost"
+
+#### log.receiver.port <a name="c.log.receiver.port" class="anchor"></a>
+
+[クエリのデバッグ](query.html)時に、Topologyが出力するログを転送するポート番号を指定します。
+
+> Default: 7401
+
+#### log.buffer.max <a name="c.log.buffer.max" class="anchor"></a>
+
+[クエリのデバッグ](query.html)時に、Topologyが出力するログを受信するキューのバッファサイズを指定します。指定したサイズを超えたログはキューから削除されます。
+
+> Default: 1000
 
 ### Monitorに関する設定
 
@@ -281,13 +299,13 @@ TupleStoreServerからクライアントに送られるCOOKIEの残存時間を�
 
 #### persistent.deser.queue.size <a name="s.persistent.deser.queue.size" class="anchor"></a>
 
-TupleStoreServerがクライアントからデータを受領後、Kafkaへ書き込みを行う際にシリアライズを行うまでの待機キューのサイズを指定します。シリアライズが遅延している場合、<a href="#s.persistent.deser.parallelism">persistent.deser.parallelism</a>と共に調整を行ってください。
+TupleStoreServerがクライアントからデータを受領後、Kafkaへ書き込みを行う際にシリアライズを行うまでの待機キューのサイズを指定します。シリアライズが遅延している場合、[persistent.deser.parallelism](#s.persistent.deser.parallelism)と共に調整を行ってください。
 
 > Default: 1024
 
 #### persistent.deser.parallelism <a name="s.persistent.deser.parallelism" class="anchor"></a>
 
-TupleStoreServerがクライアントから受領したデータをシリアライズする並列度を指定します。シリアライズが遅延している場合、<a href="#s.persistent.deser.queue.size">persistent.deser.queue.size</a>と共に調整を行ってください。
+TupleStoreServerがクライアントから受領したデータをシリアライズする並列度を指定します。シリアライズが遅延している場合、[persistent.deser.queue.size](#s.persistent.deser.queue.size)と共に調整を行ってください。
 
 > Default: 32
 
@@ -299,29 +317,29 @@ TupleStoreServerがシリアライズする処理クラスを指定します。�
 
 #### persistent.emitter.queue.size <a name="s.persistent.emitter.queue.size" class="anchor"></a>
 
-シリアライズされたTupleをKafkaに書き込む際の待機キューのサイズを指定します。Kafkaへの書き込みが遅延している場合、<a href="#s.persistent.emitter.parallelism">persistent.emitter.parallelism</a>、Kafkaのクラスタ設定と共に調整してください。
+シリアライズされたTupleをKafkaに書き込む際の待機キューのサイズを指定します。Kafkaへの書き込みが遅延している場合、[persistent.emitter.parallelism](#s.persistent.emitter.parallelism)、Kafkaのクラスタ設定と共に調整してください。
 
 > Default: 1024
 
 #### persistent.emitter.parallelism <a name="s.persistent.emitter.parallelism" class="anchor"></a>
 
-シリアライズされたTupleをKafkaに書き込む際の並列度を指定します。Kafkaへの書き込みが遅延している場合、<a href="#s.persistent.emitter.queue.size">persistent.emitter.queue.size</a>、Kafkaのクラスタ設定と共に調整してください。
+シリアライズされたTupleをKafkaに書き込む際の並列度を指定します。Kafkaへの書き込みが遅延している場合、[persistent.emitter.queue.size](#s.persistent.emitter.queue.size)、Kafkaのクラスタ設定と共に調整してください。
 
 > Default: 32
 
 #### persistent.emit.tuples.max <a name="s.persistent.emit.tuples.max" class="anchor"></a>
 
-シリアライズされたTupleをKafkaに書き込む際、一度に書き込むTuple数の最大値を指定します。この設定値は、<a href="#s.persistent.emitter.queue.size">persistent.emitter.queue.size</a>でサイズを指定したキューにTupleが複数滞留している場合に使用されます。通常は、キューにTupleが1つでも存在すれば、Kafkaへの書き込み処理が実行されます。
+シリアライズされたTupleをKafkaに書き込む際、一度に書き込むTuple数の最大値を指定します。この設定値は、[persistent.emitter.queue.size](#s.persistent.emitter.queue.size)でサイズを指定したキューにTupleが複数滞留している場合に使用されます。通常は、キューにTupleが1つでも存在すれば、Kafkaへの書き込み処理が実行されます。
 
-設定値より少ないTuple数でも、Tupleの合計サイズが<a href="#s.persistent.emit.tuples.max.size">persistent.emit.tuples.max.size</a>で設定された値よりも大きくなった場合、Kafkaへの書き込みが実行されます。
+設定値より少ないTuple数でも、Tupleの合計サイズが[persistent.emit.tuples.max.size](#s.persistent.emit.tuples.max.size)で設定された値よりも大きくなった場合、Kafkaへの書き込みが実行されます。
 
 > Default: 8
 
 #### persistent.emit.tuples.max.size <a name="s.persistent.emit.tuples.max.size" class="anchor"></a>
 
-シリアライズされたTupleをKafkaに書き込む際、一度に書き込むTupleの合計サイズの最大値を設定します。この設定値は、<a href="#s.persistent.emitter.queue.size">persistent.emitter.queue.size</a>でサイズを指定したキューにTupleが複数滞留している場合に使用されます。通常は、キューにTupleが1つでも存在すれば、Kafkaへの書き込み処理が実行されます。
+シリアライズされたTupleをKafkaに書き込む際、一度に書き込むTupleの合計サイズの最大値を設定します。この設定値は、[persistent.emitter.queue.size](#s.persistent.emitter.queue.size)でサイズを指定したキューにTupleが複数滞留している場合に使用されます。通常は、キューにTupleが1つでも存在すれば、Kafkaへの書き込み処理が実行されます。
 
-設定値より小さな合計サイズでも、Tuple数が<a href="#s.persistent.emit.tuples.max">persistent.emit.tuples.max</a>で設定された値に達している場合、Kafkaへの書き込みが実行されます。
+設定値より小さな合計サイズでも、Tuple数が[persistent.emit.tuples.max](#s.persistent.emit.tuples.max)で設定された値に達している場合、Kafkaへの書き込みが実行されます。
 
 > Default: 1024
 
@@ -329,7 +347,7 @@ TupleStoreServerがシリアライズする処理クラスを指定します。�
 
 TupleStoreServerからTopologyへ、Tupleを送信する処理を行うクラスを指定します。デフォルト設定では、TupleStoreServerはKafkaにTupleを書き込みます。Kafkaに書き込みを行うことで、Tupleが一定期間保存されることになります。
 
-gungnir-standalone.yamlを用いたローカルモードで起動すると、<a href="#s.persistent.emitter">persistent.emitter</a>には **InMemoryEmitter** が適用され、Kafkaを起動することなく動作の確認を行えます。ただし<a href="#s.cluster.mode">cluster.mode</a>、<a href="#s.storm.cluster.mode">storm.cluster.mode</a>が共に **local** の場合にのみ使用することができます。
+gungnir-standalone.yamlを用いたローカルモードで起動すると、[persistent.emitter](#s.persistent.emitter)には **InMemoryEmitter** が適用され、Kafkaを起動することなく動作の確認を行えます。ただし[cluster.mode](#s.cluster.mode)、[storm.cluster.mode](#s.storm.cluster.mode)が共に **local** の場合にのみ使用することができます。
 
 > Default: org.gennai.gungnir.tuple.persistent.KafkaPersistentEmitter
 
@@ -419,7 +437,7 @@ Stromの稼働モードを指定します。指定可能な値は **local** (Sto
 
 #### storm.nimbus.host <a name="s.storm.nimbus.host" class="anchor"></a>
 
-稼働しているStormクラスタのNimbusホストを、名前解決ができるホスト名もしくはIPで指定します。<a href="#s.storm.cluster.mode">storm.cluster.mode</a>が **distributed** である場合にのみ使用されます。
+稼働しているStormクラスタのNimbusホストを、名前解決ができるホスト名もしくはIPで指定します。[storm.cluster.mode](#s.storm.cluster.mode)が **distributed** である場合にのみ使用されます。
 
 > Default: "localhost"
 
@@ -433,13 +451,13 @@ Stromの稼働モードを指定します。指定可能な値は **local** (Sto
 
 #### topology.status.check.times <a name="s.topology.status.check.times" class="anchor"></a>
 
-投入されたTopologyの起動もしくは停止時に、Topologyの状態を確認する回数の最大値を指定します。GungnirServerは、この設定値と<a href="#s.topology.status.check.interval">topology.status.check.interval</a>の設定値を乗じた時間内に、Topologyの状態変更を検知できない場合、処理をロールバックします。
+投入されたTopologyの起動もしくは停止時に、Topologyの状態を確認する回数の最大値を指定します。GungnirServerは、この設定値と[topology.status.check.interval](#s.topology.status.check.interval)の設定値を乗じた時間内に、Topologyの状態変更を検知できない場合、処理をロールバックします。
 
 > Default: 20
 
 #### topology.status.check.interval <a name="s.topology.status.check.interval" class="anchor"></a>
 
-投入されたTopologyの起動もしくは停止時に、Topologyの状態を確認する間隔をミリ秒で指定します。GungnirServerは、この設定値と<a href="#s.topology.status.check.times">topology.status.check.times</a>の設定値を乗じた時間内に、Topologyの状態変更を検知できない場合、処理をロールバックします。
+投入されたTopologyの起動もしくは停止時に、Topologyの状態を確認する間隔をミリ秒で指定します。GungnirServerは、この設定値と[topology.status.check.times](#s.topology.status.check.times)の設定値を乗じた時間内に、Topologyの状態変更を検知できない場合、処理をロールバックします。
 
 > Default: 2000
 
@@ -451,7 +469,7 @@ Operatorの並列度のデフォルト値を指定します。クエリに`paral
 
 #### gungnir.local.dir <a name="s.gungnir.local.dir" class="anchor"></a>
 
-<a href="/ja/dml.html#TupleJoin">複数のTupleをJOINする</a>際に、一時的にTupleをファイルに格納することができます。格納しておくファイルは指定したディレクトリに作成されます。`${gungnir.home}`からの相対パスとなります。
+[複数のTupleをJOINする](/ja/dml.html#TupleJoin)際に、一時的にTupleをファイルに格納することができます。格納しておくファイルは指定したディレクトリに作成されます。`${gungnir.home}`からの相対パスとなります。
 
 > Default: "gungnir-local"
 
@@ -461,7 +479,7 @@ Operatorの並列度のデフォルト値を指定します。クエリに`paral
 
 GungnirServerのメタ情報を格納するのに使用するクラスを指定します。
 
-設定可能な値は、デフォルト設定の **MongoDbMetaStore** と **InMemoryMetaStore** です。 **InMemoryMetaStore** はGungnirServerが起動している間のみ利用可能なMetastoreです。GungnirServerを再起動すると各メタ情報は消失します。メタ情報を永続的にするには **MongoDbMetaStore** を使用してください。 **MongoDbMetaStore** を使用する場合、<a href="#s.metastore.mongodb.servers">metastore.mongodb.servers</a>と共に指定する必要があります。
+設定可能な値は、デフォルト設定の **MongoDbMetaStore** と **InMemoryMetaStore** です。 **InMemoryMetaStore** はGungnirServerが起動している間のみ利用可能なMetastoreです。GungnirServerを再起動すると各メタ情報は消失します。メタ情報を永続的にするには **MongoDbMetaStore** を使用してください。 **MongoDbMetaStore** を使用する場合、[metastore.mongodb.servers](#s.metastore.mongodb.servers)と共に指定する必要があります。
 
 > Default: org.gennai.gungnir.metastore.MongoDbMetaStore
 
@@ -618,79 +636,79 @@ TupleJoin時に、メモリもしくはファイル上に一時的に保存し�
 
 #### kafka.spout.fetch.size <a name="s.kafka.spout.fetch.size" class="anchor"></a>
 
-<a href="/ja/dml.html#KAFKA_SPOUT">Kafka Spout Processor</a>が、Kafkaから一度に取得するデータのサイズを指定します。
+[Kafka Spout Processor](/ja/dml.html#KAFKA_SPOUT)が、Kafkaから一度に取得するデータのサイズを指定します。
 
 > Default: 1048576
 
 #### kafka.spout.fetch.interval <a name="s.kafka.spout.fetch.interval" class="anchor"></a>
 
-<a href="/ja/dml.html#KAFKA_SPOUT">Kafka Spout Processor</a>が、Kafkaからデータを取得する間隔をミリ秒で指定します。
+[Kafka Spout Processor](/ja/dml.html#KAFKA_SPOUT)が、Kafkaからデータを取得する間隔をミリ秒で指定します。
 
 > Default: 1000
 
 #### kafka.spout.offset.behind.max <a name="s.kafka.spout.offset.behind.max" class="anchor"></a>
 
-<a href="/ja/dml.html#KAFKA_SPOUT">Kafka Spout Processor</a>において、オフセットが書き込まれない最大の許容時間を指定します。
+[Kafka Spout Processor](/ja/dml.html#KAFKA_SPOUT)において、オフセットが書き込まれない最大の許容時間を指定します。
 
 > Default: 9223372036854775807
 
 #### kafka.spout.state.update.interval <a name="s.kafka.spout.state.update.interval" class="anchor"></a>
 
-<a href="/ja/dml.html#KAFKA_SPOUT">Kafka Spout Processor</a>が、状態を更新する間隔をミリ秒で指定します。
+[Kafka Spout Processor](/ja/dml.html#KAFKA_SPOUT)が、状態を更新する間隔をミリ秒で指定します。
 
 > Default: 2000
 
 #### kafka.spout.topic.replication.factor <a name="s.kafka.spout.topic.replication.factor" class="anchor"></a>
 
-Topologyの投入時に、<a href="/ja/dml.html#KAFKA_SPOUT">Kafka Spout Processor</a>がKafkaに作成するトピックのレプリケーション数を指定します。
+Topologyの投入時に、[Kafka Spout Processor](/ja/dml.html#KAFKA_SPOUT)がKafkaに作成するトピックのレプリケーション数を指定します。
 
 > Default: 1
 
 #### kafka.spout.read.brokers.retry.times <a name="s.kafka.spout.read.brokers.retry.times" class="anchor"></a>
 
-<a href="/ja/dml.html#KAFKA_SPOUT">Kafka Spout Processor</a>がKafkaからデータを取得する際に、担当するパーティションのリーダー情報を取得するのに試行する回数を指定します。
+[Kafka Spout Processor](/ja/dml.html#KAFKA_SPOUT)がKafkaからデータを取得する際に、担当するパーティションのリーダー情報を取得するのに試行する回数を指定します。
 
 > Default: 5
 
 #### kafka.spout.read.brokers.retry.interval <a name="s.kafka.spout.read.brokers.retry.interval" class="anchor"></a>
 
-<a href="/ja/dml.html#KAFKA_SPOUT">Kafka Spout Processor</a>がKafkaからデータを取得する際に、担当するパーティションのリーダー情報を取得するのに試行する間隔をミリ秒で指定します。
+[Kafka Spout Processor](/ja/dml.html#KAFKA_SPOUT)がKafkaからデータを取得する際に、担当するパーティションのリーダー情報を取得するのに試行する間隔をミリ秒で指定します。
 
 > Default: 1000
 
 #### kafka.spout.partition.operation.retry.times <a name="s.kafka.spout.partition.operation.retry.times" class="anchor"></a>
 
-<a href="/ja/dml.html#KAFKA_SPOUT">Kafka Spout Processor</a>がKafkaからデータを取得する時、Kafkaクラスタの状態によってパーティション情報が変更されている場合があります。その際に、<a href="/ja/dml.html#KAFKA_SPOUT">Kafka Spout Processor</a>にて再度Kafkaのパーティション情報を取得する試行回数を指定します。
+[Kafka Spout Processor](/ja/dml.html#KAFKA_SPOUT)がKafkaからデータを取得する時、Kafkaクラスタの状態によってパーティション情報が変更されている場合があります。その際に、[Kafka Spout Processor](/ja/dml.html#KAFKA_SPOUT)にて再度Kafkaのパーティション情報を取得する試行回数を指定します。
 
 > Default: 5
 
 #### kafka.spout.partition.operation.retry.interval <a name="s.kafka.spout.partition.operation.retry.interval" class="anchor"></a>
 
-<a href="/ja/dml.html#KAFKA_SPOUT">Kafka Spout Processor</a>がKafkaからデータを取得する時、Kafkaクラスタの状態によってパーティション情報が変更されている場合があります。その際に、 <a href="/ja/dml.html#KAFKA_SPOUT">Kafka Spout Processor</a>にて再度Kafkaのパーティション情報を取得する試行の間隔時間をミリ秒で指定します。
+[Kafka Spout Processor](/ja/dml.html#KAFKA_SPOUT)がKafkaからデータを取得する時、Kafkaクラスタの状態によってパーティション情報が変更されている場合があります。その際に、 [Kafka Spout Processor](/ja/dml.html#KAFKA_SPOUT)にて再度Kafkaのパーティション情報を取得する試行の間隔時間をミリ秒で指定します。
 
 > Default: 1000
 
 #### mongo.fetch.servers <a name="s.mongo.fetch.servers" class="anchor"></a>
 
-`JOIN`句において<a href="/ja/dml.html#MONGO_FETCH">Mongo Fetch Processor</a>を用いる際に、結合するデータの読み込み元となるMongoDBサーバをリスト形式で指定します。`[host|IP]:[port]`の書式で指定します。
+`JOIN`句において[Mongo Fetch Processor](/ja/dml.html#MONGO_FETCH)を用いる際に、結合するデータの読み込み元となるMongoDBサーバをリスト形式で指定します。`[host|IP]:[port]`の書式で指定します。
 
 > Default: - "localhost:27017"
 
 #### mongo.fetch.cache.size <a name="s.mongo.fetch.cache.size" class="anchor"></a>
 
-`JOIN`句において<a href="/ja/dml.html#MONGO_FETCH">Mongo Fetch Processor</a>使用時の、キャッシュを保持する件数の最大値を指定します。
+`JOIN`句において[Mongo Fetch Processor](/ja/dml.html#MONGO_FETCH)使用時の、キャッシュを保持する件数の最大値を指定します。
 
 > Default: 1024
 
 #### web.fetch.cache.size <a name="s.web.fetch.cache.size" class="anchor"></a>
 
-`JOIN`句において<a href="/ja/dml.html#WEB_FETCH">Web Fetch Processor</a>使用時の、キャッシュを保持する件数の最大値を指定します。
+`JOIN`句において[Web Fetch Processor](/ja/dml.html#WEB_FETCH)使用時の、キャッシュを保持する件数の最大値を指定します。
 
 > Default: 1024
 
 #### jdbc.fetch.driver <a name="s.jdbc.fetch.driver" class="anchor"></a>
 
-`JOIN`句において<a href="/ja/dml.html#JDBC_FETCH">JDBC Fetch Processor</a>を用いる際に、接続先となるRDBに応じたドライバーを指定します。
+`JOIN`句において[JDBC Fetch Processor](/ja/dml.html#JDBC_FETCH)を用いる際に、接続先となるRDBに応じたドライバーを指定します。
 
 > Default: "com.mysql.jdbc.Driver"
 
@@ -698,31 +716,31 @@ MySQL以外に接続をする場合には、ドライバーを組み込む必要
 
 #### jdbc.fetch.cache.size <a name="s.jdbc.fetch.cache.size" class="anchor"></a>
 
-`JOIN`句において<a href="/ja/dml.html#JDBC_FETCH">JDBC Fetch Processor</a>使用時の、キャッシュを保持する件数の最大値を指定します。
+`JOIN`句において[JDBC Fetch Processor](/ja/dml.html#JDBC_FETCH)使用時の、キャッシュを保持する件数の最大値を指定します。
 
 > Default: 1024
 
 #### kafka.emit.brokers <a name="s.kafka.emit.brokers" class="anchor"></a>
 
-`EMIT`句において<a href="/ja/dml.html#KAFKA_EMIT">Kafka Emit Processor</a>を用いた際に、出力先となるKafkaクラスタのBrokerをリスト形式で指定します。
+`EMIT`句において[Kafka Emit Processor](/ja/dml#KAFKA_EMIT)を用いた際に、出力先となるKafkaクラスタのBrokerをリスト形式で指定します。
 
 > Default: - "localhost:9092"
 
 #### kafka.emit.required.acks <a name="s.kafka.emit.required.acks" class="anchor"></a>
 
-`EMIT`句において<a href="/ja/dml.html#KAFKA_EMIT">Kafka Emit Processor</a>を用いる際に、出力先となるKafkaクラスタからAckをどのタイミングで受け取るかを指定します。詳細に関しては[Kafkaのドキュメント](http://kafka.apache.org/documentation.html)を参照してください。
+`EMIT`句において[Kafka Emit Processor](/ja/dml.html#KAFKA_EMIT)を用いる際に、出力先となるKafkaクラスタからAckをどのタイミングで受け取るかを指定します。詳細に関しては[Kafkaのドキュメント](http://kafka.apache.org/documentation.html)を参照してください。
 
 > Default: 1
 
 #### mongo.persist.servers <a name="s.mongo.persist.servers" class="anchor"></a>
 
-`EMIT`句において<a href="/ja/dml.html#MONGO_PERSIST">Mongo Persist Processor</a> を用いる際に、出力先となるMongoDBサーバをリスト形式で指定します。
+`EMIT`句において[Mongo Persist Processor](/ja/dml.html#MONGO_PERSIST)を用いる際に、出力先となるMongoDBサーバをリスト形式で指定します。
 
 > Default: - "localhost:27017"
 
 #### jdbc.persist.driver <a name="s.jdbc.persist.driver" class="anchor"></a>
 
-`EMIT`句において<a href="/ja/dml.html#JDBC_PERSIST">JDBC Persist Processor</a>を用いる際に、出力先となるRDBに応じたドライバーを指定します。
+`EMIT`句において[JDBC Persist Processor](/ja/dml.html#JDBC_PERSIST)を用いる際に、出力先となるRDBに応じたドライバーを指定します。
 
 > Default: "com.mysql.jdbc.Driver"
 
@@ -746,7 +764,7 @@ GungnirServer/TupleStoreServerにおけるメトリクス情報を取得する�
 * org.gennai.gungnir.metrics.ConsoleMetricsReporter
 * org.gennai.gungnir.metrics.StatsdMetricsReporter
 
-詳細は<a href="/ja/metrics.html">メトリクス設定</a>の項目を参照してください。
+詳細は[メトリクス設定](/ja/metrics.html)の項目を参照してください。
 
 #### topology.metrics.enabled <a name="s.topology.metrics.enabled" class="anchor"></a>
 
@@ -765,7 +783,7 @@ StormのTopologyに関するメトリクス情報を取得するクラスを指�
 * backtype.storm.metrics.LoggingMetricsConsumer
 * org.gennai.gungnir.metrics.StatsdMetricsConsumer
 
-詳細は<a href="/ja/metrics.html">メトリクス設定</a>の項目を参照してください。
+詳細は[メトリクス設定](/ja/metrics.html)の項目を参照してください。
 
 #### topology.metrics.consumer.parallelism <a name="s.topology.metrics.consumer.parallelism" class="anchor"></a>
 

@@ -7,8 +7,8 @@ title: メトリクス設定 / genn.ai
 
 gennaiでは下記2種類のメトリクス情報を取得することができます。
 
-* Stormにおける処理Tupleに関するメトリクス(<a href="#consumer">ConsumerMetrics</a>)
-* TupleStoreServerにおけるTupleに関するメトリクス(<a href="#reporter">ReporterMetrics</a>)
+* Stormにおける処理Tupleに関するメトリクス([ConsumerMetrics](#consumer))
+* TupleStoreServerにおけるTupleに関するメトリクス([ReporterMetrics](#reporter))
 
 以降では、これらのメトリクスについて記載します。
 
@@ -120,7 +120,7 @@ CSVファイル形式で出力します。TupleStoreServerを複数のホスト�
         statsd.port: ${metrics.statsd.port}
         statsd.prefix: ${metrics.reporter.prefix}
 
-上記設定例では、`statsd.host`/`statsd.port`/`statsd.prefix`の設定値をそれぞれ<a href="/ja/config.html#s.metrics.statsd.host">metrics.statsd.host</a>/<a href="/ja/config.html#s.metrics.statsd.port">metrics.statsd.port</a>/<a href="/ja/config.html#s.metrics.reporter.prefix">metrics.reporter.prefix</a>の設定値を参照するようにしています。
+上記設定例では、`statsd.host`/`statsd.port`/`statsd.prefix`の設定値をそれぞれ[metrics.statsd.host](/ja/config.html#s.metrics.statsd.host)/[metrics.statsd.port](/ja/config.html#s.metrics.statsd.port)/[metrics.reporter.prefix](/ja/config.html#s.metrics.reporter.prefix)の設定値を参照するようにしています。
 
 ----
 

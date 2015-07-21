@@ -352,6 +352,173 @@ Topologyは停止している必要があります。削除する前に `DESC TO
 
 ---
 
+### UPLOAD
+
+UDF/UDAFを実装したjarファイルをGungnirServerにアップロードします。
+
+    UPLOAD path_to_jar;
+
+* path_to_jar には、jarファイルの絶対パスを指定します。
+
+> Example:
+>
+    UPLOAD /home/gennai/plugins/target/dist/plugin.jar;
+
+---
+
+### SHOW FILES
+
+アップロード済みのjarファイルの一覧を表示します。
+
+    SHOW FILES;
+
+結果はJSONで出力されます。
+
+> Result:
+>
+    [
+      {
+        "name":"plugin.jar",
+        "topologies":["d0ff9d57ee17407cb12fd0852cc62097"],
+        "owner":"root",
+        "createTime":"2015-07-16T07:17:14.223Z"
+      }
+    ]
+
+* name は、アップロードしたjarのファイル名です。
+* topologies は、アップロードしたjarファイルに含まれるUDF/UDAF関数を使用しているTopologyIDの配列です。
+* owner は、jarファイルをアップロードしたユーザです。
+* createTime は、jarファイルをアップロードした時間です。
+
+---
+
+### DESC FILE
+
+アップロードしたjarファイルの詳細を表示します。
+
+    DESC FILE jar_file;
+
+* jar_file は、jarファイル名を指定します。
+
+結果はJSONで出力されます。
+
+> Result:
+>
+    {
+      "name":"plugin.jar",
+      "size":7175,
+      "checksum":479480838,
+      "topologies":["d0ff9d57ee17407cb12fd0852cc62097"],
+      "owner":"root",
+      "createTime":"2015-07-16T07:17:14.223Z"
+    }
+
+* name は、アップロードしたjarのファイル名です。
+* size は、アップロードしたjarのファイルサイズ(Byte)です。
+* checksum は、アップロードしたjarのchecksum値です。
+* topologies は、アップロードしたjarファイルに含まれるUDF/UDAF関数を使用しているTopologyIDの配列です。
+* owner は、jarファイルをアップロードしたユーザです。
+* createTime は、jarファイルをアップロードした時間です。
+
+---
+
+### DROP FILE
+
+アップロードしたjarファイルを削除します。
+
+    DROP FILE jar_file;
+
+* jar_file は、jarファイル名を指定します。
+
+> Example:
+>
+    gungnir> DROP FILE plugin.jar;
+    OK
+
+---
+
+### CREATE FUNCTION
+
+UDF/UDAFを定義します。
+
+    CREATE FUNCTION function_name AS 'name.space.Function.class';
+
+* function_name は、定義する関数名を指定します。
+* name.space.Function.class は、関数で使用するクラス名をネームスペースを全て指定し、".class"で終了するよ>うにします。クラス名は必ず &#39; (シングルクォート)で囲みます。
+
+> Example:
+>
+    gungnir> CREATE FUNCTION echo AS 'org.gennai.gungnir.plugins.udf.Echo.class';
+    OK
+
+---
+
+### SHOW FUNCTIONS
+
+定義済みのUDF/UDAFの一覧を表示します。
+
+    SHOW FUNCTIONS;
+
+結果はJSONで出力されます。
+
+> Result:
+>
+    [
+      {
+        "name":"echo",
+        "topologies":["d0ff9d57ee17407cb12fd0852cc62097"],
+        "owner":"root",
+        "createTime":"2015-07-16T07:21:02.046Z"
+      }
+    ]
+
+---
+
+### DESC FUNCTION
+
+定義されたUDF/UDAFの関数を表示します。
+
+    DESC FUNCTION function_name;
+
+* function_name は、UDF/UDAFの定義された関数名を指定します。
+
+結果はJSONで表示されます。
+
+> Result:
+>
+    {
+      "name":"echo",
+      "type":"UDF",
+      "location":"org.gennai.gungnir.plugins.udf.Echo.class",
+      "topologies":["d0ff9d57ee17407cb12fd0852cc62097"],
+      "owner":"root",
+      "createTime":"2015-07-16T07:18:31.390Z"
+    }
+
+* name は、定義したUDF/UDAFの関数名です。
+* type は、定義された関数のタイプ(UDF/UDAF)を表示します。
+* location は、定義されたUDF/UDAFで使用されるクラス名です。
+* topologies は、アップロードしたjarファイルに含まれるUDF/UDAF関数を使用しているTopologyIDの配列です。
+* owner は、jarファイルをアップロードしたユーザです。
+* createTime は、jarファイルをアップロードした時間です。
+
+---
+
+### DROP FUNCTION
+
+定義されたUDF/UDAFの関数を削除します。
+
+    DROP FUNCTION function_name;
+
+* function_name は、UDF/UDAFの定義された関数名を指定します。
+
+> Example:
+>
+    gungnir> DROP FUNCTION echo;
+    OK
+
+---
+
 ### SET
 
 Topologyのプロパティを設定、確認することができます。
@@ -377,6 +544,7 @@ property_valueを省略した場合、該当のプロパティに設定されて
 * topology.metrics.enabled
 * topology.metrics.interval.secs
 * topology.workers
+* debug
 
 設定したプロパティはクライアントのセッションが閉じられるまで保持されます。一度のセッションで複数のTopologyをSUBMITする場合には、注意してください。
 
@@ -407,7 +575,7 @@ Topologyの動作確認の為に、TopologyにJOINTupleを送信します。
     POST /gungnir/v0.1/547539ed0cf2422ae5af8e1c/userAction/json
     OK
 
-#### Interactive Mode
+#### Interactive Mode <a name="interactive" class="anchor"></a>
 
 POSTコマンドには、インタラクティブにJSONTupleを編集できるモードがあります。
 json_tuple を指定せずにPOSTコマンドを実行すると、送信するJSONTupleの入力を求められます。
@@ -664,6 +832,23 @@ Stormのクラスタ情報を取得します。
 
 ---
 
+### LOG
+
+`SET debug = on`でデバッグ設定をしたTopologyに投入したTupleの経路を確認できます。
+
+    LOG;
+
+> Result
+>
+    gungnir> LOG;
+    [test] SPOUT_0 -> PARTITION_1  ( tuple1:[123,"hiraga"] )
+    [test] PARTITION_1 -> EMIT_2  ( tuple1:[123,"hiraga"] )
+    [test EMIT_2] {"id":123,"content":"hiraga"}
+
+詳細は[クエリのデバッグ](/ja/query.html)を参照してください。
+
+---
+
 ## Gungnir Command Batchmode
 
 gungnirコマンドのバッチモードを使用します。
@@ -784,3 +969,4 @@ postスクリプトでは、ユーザログインを行っていないため、�
     $ ./bin/post -a 5465e7d3e4b008da18561803 -t tuple1 -n 50 -p 3 -f post.data
 
 上記例ではファイルを指定しているので、ファイルに記述されているTuple数×50回×3並列で送信されます。従って、ファイルに記述されているTuple数が10であったとすると、10×50×3=1500個のTupleが送信されます。
+

@@ -83,7 +83,7 @@ Memory Spout Processorを使用するには、GungnirServerの下記設定項目
 複数のTupleをフィールドの値を元に結合します。
 
 結合対象のTupleが未到達の場合、先に到着しているTupleはメモリに保持され結合対象のTupleの到着を待機します。未結合のTupleが多くなると想定される場合、`USING file_cache()`構文を追加することで、Tupleをファイルに一時的に格納することができます。
-ファイルキャッシュは、<a href="/ja/config.html#s.gungnir.local.dir">gungnir.local.dir</a>で指定したディレクトリに作成されます。
+ファイルキャッシュは、[gungnir.local.dir](/ja/config.html#s.gungnir.local.dir)で指定したディレクトリに作成されます。
 
 `USING file_cache()`構文を省略した場合、もしくは`USING memory_cache()`を明示的に指定した場合には、Tupleはメモリに保存されます。
 
@@ -604,11 +604,11 @@ field1はそのまま、field6.member1をfield10フィールドへ、field7&#91;
 
 `EACH`句では下記関数を使用することができます。
 
-* <a href="#total_functions">集計関数</a>
-* <a href="#edit_functions">編集関数</a>
-* <a href="#operation_functions">四則演算</a>
-* <a href="#math_functions">数学関数</a>
-* <a href="#distance_functions">距離計算</a>
+* [集計関数](#total_functions)
+* [編集関数](#edit_functions)
+* [四則演算](#operation_functions)
+* [数学関数](#math_functions)
+* [距離計算](/distance_functions)
 
 ---
 
@@ -722,13 +722,13 @@ LENGTHにスライドするTupleの数を指定します。
 
 `SLIDE`句では下記関数が使用できます。
 
-* <a href="#total_functions">集計関数</a>
-* <a href="#edit_functions">編集関数</a>
-* <a href="#operation_functions">四則演算</a>
-* <a href="#math_functions">数学関数</a>
-* <a href="#distance_functions">距離計算</a>
-* <a href="#list_functions">リストフィールド操作関数</a>
-* <a href="#stack_functions">スタック関数</a>
+* [集計関数](#total_functions)
+* [編集関数](#edit_functions)
+* [四則演算](#operation_functions)
+* [数学関数](#math_functions)
+* [距離計算](#distance_functions)
+* [リストフィールド操作関数](#list_functions)
+* [スタック関数](#stack_functions)
 
 ---
 
@@ -777,13 +777,13 @@ cronの書式は、[Quartz](http://www.quartz-scheduler.org/documentation/quartz
 
 `SNAPSHOT`句では下記関数が使用できます。
 
-* <a href="#total_functions">集計関数</a>
-* <a href="#edit_functions">編集関数</a>
-* <a href="#operation_functions">四則演算</a>
-* <a href="#math_functions">数学関数</a>
-* <a href="#distance_functions">距離計算</a>
-* <a href="#list_functions">リストフィールド操作関数</a>
-* <a href="#stack_functions">スタック関数</a>
+* [集計関数](#total_functions)
+* [編集関数](#edit_functions)
+* [四則演算](#operation_functions)
+* [数学関数](#math_functions)
+* [距離計算](#distance_functions)
+* [リストフィールド操作関数](#list_functions)
+* [スタック関数](#stack_functions)
 
 ---
 

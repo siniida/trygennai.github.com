@@ -13,6 +13,7 @@ redirect_from: "/index_ja.html"
 * [DML](dml.html)
 * [チュートリアル](tutorial.html)
   * [環境準備](environment.html)
+  * [クエリのデバッグ](query.html)
 * [設定](config.html)
   * [設定例](example.html)
   * [メトリクス](metrics.html)

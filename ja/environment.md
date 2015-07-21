@@ -137,7 +137,7 @@ DockerHubからイメージをダウンロードして利用します。
     $ git checkout cluster
     $ docker-compose up
 
-ここで起動されるgenn.ai環境は[完全分散モード](/ja/config.html#mode.distributed)です。
+DockerHubからイメージをダウンロードします。 ここで起動されるgenn.ai環境は[完全分散モード](/ja/config.html#mode.distributed)です。
 
 別ターミナルにてクライアントを実行します。
 
