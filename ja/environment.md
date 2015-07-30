@@ -95,6 +95,7 @@ DockerHubからイメージをダウンロードして利用します。
 
     $ git clone https://github.com/siniida/gennai.docker
     $ cd gennai.docker
+    $ git checkout refs/tags/all-in-one
     $ docker build -t gennai .
     $ docker run -ti --rm gennai /bin/bash
 
@@ -117,7 +118,7 @@ DockerHubからイメージをダウンロードして利用します。
 
     $ git clone https://github.com/siniida/gennai.docker
     $ cd gennai.docker
-    $ git checkout standalone
+    $ git checkout refs/tags/standalone
     $ docker build -t standalone .
     $ docker run -ti --rm standalone
     Pidfile: ./../gungnir-server.pid
@@ -134,7 +135,7 @@ DockerHubからイメージをダウンロードして利用します。
 
     $ git clone https://github.com/siniida/gennai.docker
     $ cd gennai.docker
-    $ git checkout cluster
+    $ git checkout refs/tags/cluster
     $ docker-compose up
 
 ここで起動されるgenn.ai環境は[完全分散モード](/ja/config.html#mode.distributed)です。
